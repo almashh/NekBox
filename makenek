@@ -6,14 +6,14 @@
 #SOURCE_ROOT="$HOME/nek" 
 
 # Fortran compiler
-#F77="gfortran -I/opt/openmpi/include -I/opt/openmpi/lib -L/opt/openmpi/lib -lmpi_f90 -lmpi_f77 -lmpi -ldl -lm -Wl,--export-dynamic -lrt -lnsl -lutil  -pg"
+#F77="gfortran -I/usr/lib/openmpi/include -I/usr/lib/openmpi/lib -L/usr/lib/openmpi/lib -lmpi_f90 -lmpi_f77 -lmpi -ldl -lm -Wl,--export-dynamic -lrt -lnsl -lutil  -pg"
 CHECKS="-Wall -Wextra -Wno-unused-dummy-argument -pedantic-errors -Wline-truncation -Wunderflow -finit-real=nan -fbacktrace -fcheck=all " #-ffpe-trap=invalid,zero,overflow "
 #F77="mpif90  -g -check all -debug all -traceback "
 F77="mpif90  "
 
 # C compiler
 CC="mpicc "
-#CC="gcc -I/opt/openmpi/include -pthread -L/opt/openmpi/lib -lmpi -ldl -lm -Wl,--export-dynamic -lrt -lnsl -lutil -fprofile-arcs -ftest-coverage -pg"
+#CC="gcc -I/usr/lib/openmpi/include -pthread -L/usr/lib/openmpi/lib -lmpi -ldl -lm -Wl,--export-dynamic -lrt -lnsl -lutil -fprofile-arcs -ftest-coverage -pg"
 
 # pre-processor symbol list 
 # (set PPLIST=? to get a list of available symbols)
