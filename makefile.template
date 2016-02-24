@@ -10,6 +10,8 @@ IFMPI=
 IFAMG= 
 IFAMG_DUMP=
 IFNEKNEK=
+IFLZ4=
+IFLZ4COMMCOMP=
 IFMOAB=
 MOAB_DIR=
 F77=
@@ -45,14 +47,16 @@ interp_mod.o ixyz_mod.o mvgeom_mod.o nekuse_mod.o  \
 opctr_mod.o restart_mod.o scratch_mod.o semhat_mod.o soln_mod.o steady_mod.o  \
 string_mod.o topol_mod.o tstep_mod.o turbo_mod.o wz_mod.o wzf_mod.o zper_mod.o \
 io_mod.o \
+math.o \
+dssum.o \
 poisson_mod.o \
 navier4.o \
 drive.o drive1.o drive2.o \
 plan4.o bdry.o coef.o conduct.o connect1.o connect2.o \
-dssum.o eigsolv.o genxyz.o  \
+eigsolv.o genxyz.o  \
 hsmg.o gmres.o convect.o induct.o \
 navier0.o navier1.o navier5.o navier6.o  navier8.o \
-map2.o ic.o ssolv.o math.o mxm_wrapper.o \
+map2.o ic.o ssolv.o mxm_wrapper.o \
 hmholtz.o \
 subs1.o \
 fast3d.o  \
@@ -69,7 +73,7 @@ makeq.o makeq_aux.o \
 #fft_custom_transpose_mod.o \
 ################################################################################
 # MXM 
-MXM = mxm_std.o 
+MXM = mxm_std.o mxm_std_sp.o 
 ################################################################################
 # LAPACK
 #LPACK = dsygv.o ssygv.o
@@ -110,6 +114,14 @@ ifeq ($(IFMPI),false)
   COMM_MPI := ${COMM_MPI} mpi_dummy.o
 endif
 
+# lz4   ########################################################################
+ifeq ($(IFLZ4),true)
+  lFLAGS := ${lFLAGS} $S/lz4/lib/liblz4.a 
+endif
+ifeq ($(IFLZ4COMMCOMP),true)
+  LZ4O := lz4.o
+  lFLAGS := ${lFLAGS} $S/lz4/lib/liblz4.a 
+endif
 # VISIT ########################################################################
 ifeq ($(IFVISIT),true)
   VISITNEK_INCLUDES:=-I$S/3rd_party
@@ -131,7 +143,7 @@ else
 	DUMMY:= $(shell rm -rf $S/mpif.h) 
 endif
 
-TMP1 = $(CORE) $(MXM) $(USR) $(MOABO) $(COMM_MPI) $(NEKNEKO) $(VISITO) $(LPACK)
+TMP1 = $(CORE) $(MXM) $(USR) $(MOABO) $(COMM_MPI) $(NEKNEKO) $(VISITO) $(LZ4O) $(LPACK)
 NOBJS_F = $(patsubst %,$(OBJDIR)/%,$(TMP1))
 TMP2 = $(JLCORE) $(JLINTP) $(CGS) 
 NOBJS_C = $(patsubst %,$(OBJDIR)/%,$(TMP2))
@@ -318,6 +330,7 @@ $(OBJDIR)/math.o	:$S/math.F90;			$(F90) -c $(FL4) $< -o $@
 # MXM       ############################################################################
 $(OBJDIR)/mxm_wrapper.o	  :$S/mxm_wrapper.F90;		$(F77) -c $(FL2) $< -o $@ 
 $(OBJDIR)/mxm_std.o	  :$S/mxm_std.F90;		$(F77) -c $(FL4) $< -o $@
+$(OBJDIR)/mxm_std_sp.o	  :$S/mxm_std_sp.F90;		$(F77) -c $(FL4) $< -o $@
 $(OBJDIR)/mxm_bgq.o	  :$S/mxm_bgq.F90;		$(F77) -c $(FL2) $< -o $@ 
 $(OBJDIR)/k10_mxm.o	  :$S/k10_mxm.c;		$(CC)  -c $(cFL2) $(JL) $< -o $@
 $(OBJDIR)/bg_aligned3.o	  :$S/bg_aligned3.s;		$(CC) -c $< -o $@
@@ -356,6 +369,7 @@ $(OBJDIR)/$(JO)findpts_el_2.o    :$(J)/findpts_el_2.c;    $(CC) -c $(cFL2) $(JL)
 #$(OBJDIR)/ssygv.o     	:$S/3rd_party/ssygv.F90;  	$(F77) -c $(FL2i4) $< -o $@
 # SYSTEM BLAS?
 #$(OBJDIR)/blas.o   	:$S/3rd_party/blas.F90;		$(F77) -c $(FL2i4) $< -o $@
+$(OBJDIR)/lz4.o             :$S/lz4.c;          $(CC) -c $(cFL2) $(JL) $< -o $@
 $(OBJDIR)/moab.o        :$S/3rd_party/moab.F90;           $(F77) -c $(FL2) $(IMESH_INCLUDES) $< -o $@
 $(OBJDIR)/imeshutil.o   :$S/3rd_party/imeshutil.F90;  	$(F77) -c $(FL2) $(IMESH_INCLUDES) $< -o $@
 $(OBJDIR)/imeshcutil.o   :$S/3rd_party/imeshcutil.c;  	$(CC) -c $(cFL2) $< -o $@

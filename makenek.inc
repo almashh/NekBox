@@ -19,6 +19,8 @@ if [ "$PPLIST" == "?" ]; then
   echo "  NO_LAPACK disable nek-supplied LAPACK routines"
   echo "  BLAS_MXM  disable nek-supplied BLAS routines"
   echo "  EXTBAR    adds underscore to exit call(for BGQ)"
+  echo "  LZ4COMPRESSION lossless compression of output using lz4"
+  echo "  LZ4COMMCOMP lossless compression of output using lz4 on compute nodes"
   echo "  XSMM      uses libxsmm for small matrix multiplies"
   exit 1
 fi
@@ -60,6 +62,8 @@ SOURCE_ROOT=$APATH_SRC
 
 IFMOAB=false
 IFNEKNEK=false
+IFLZ4=false
+IFLZ4COMMCOMP=false
 
 # do some basic checks
 if [ "$CASEDIR" == "$SOURCE_ROOT" ]; then
@@ -292,6 +296,14 @@ if [ "$i" == "NEKNEK" ]; then
      IFNEKNEK=true
 fi
 
+if [ "$i" == "LZ4COMPRESSION" ]; then
+     IFLZ4=true
+fi
+
+if [ "$i" == "LZ4COMMCOMP" ]; then
+     IFLZ4COMMCOMP=true
+fi
+
    if [ "$i" == "CVODE" ]; then
     if [ "$CVODE_DIR" == "" ]; then
        echo "ABORT: Please specify path to CVODE in CVODE_DIR!" 
@@ -337,34 +349,34 @@ if [ "$MXM_USER" != "" ]; then
 fi
 SYS_BLAS=true
 if  $SYS_BLAS ; then
-  MXM_USER="mxm_std.o " # blas.o"
+  MXM_USER="mxm_std.o mxm_std_sp.o" # blas.o"
 else
-  MXM_USER="mxm_std.o blas.o"
+  MXM_USER="mxm_std.o mxm_std_sp.o blas.o"
 fi 
 echo $PPLIST | grep 'BGL' >/dev/null 
 if [ $? -eq 0 ]; then
-   MXM_USER="mxm_std.o bg_aligned3.o bg_mxm44.o bg_mxm44_uneven.o bg_mxm3.o blas.o" 
+   MXM_USER="mxm_std.o mxm_std_sp.o bg_aligned3.o bg_mxm44.o bg_mxm44_uneven.o bg_mxm3.o blas.o" 
    OPT_FLAGS_STD="-qarch=450 -qtune=450"
    OPT_FLAGS_MAG="-O5 -qarch=450d -qtune=450"
 fi
 echo $PPLIST | grep 'BGQ' >/dev/null 
 if [ $? -eq 0 ]; then
-   MXM_USER="mxm_std.o mxm_bgq.o " 
+   MXM_USER="mxm_std.o mxm_std_sp.o mxm_bgq.o " 
    USR_FLAGS_STD+="-DBGQ"
 fi
 echo $PPLIST | grep 'XSMM' >/dev/null 
 if [ $? -eq 0 ]; then
-   MXM_USER="mxm_std.o" 
+   MXM_USER="mxm_std.o mxm_std_sp.o" 
    OPT_FLAGS_STD+=" -DUSE_LIBXSMM "
 fi
 echo $PPLIST | grep 'K10_MXM' >/dev/null 
 if [ $? -eq 0 ]; then
-   MXM_USER="mxm_std.o k10_mxm.o blas.o" 
+   MXM_USER="mxm_std.o mxm_std_sp.o k10_mxm.o blas.o" 
    OPT_FLAGS_STD="-DBGQ"
 fi
 echo $PPLIST | grep 'BLAS_MXM' >/dev/null 
 if [ $? -eq 0 ]; then
-   MXM_USER="mxm_std.o" 
+   MXM_USER="mxm_std.o mxm_std_sp.o" 
 fi
 LPACK="dsygv.o ssygv.o"
 echo $PPLIST | grep 'NO_LAPACK' >/dev/null 
@@ -422,6 +434,8 @@ sed -e "s:^F77[ ]*=.*:F77\:=$F77:" \
 -e "s/^IFMOAB[ ]*=.*/IFMOAB:=$IFMOAB/" \
 -e "s:^MOAB_DIR[ ]*=.*:MOAB_DIR\:=${MOAB_DIR}:" \
 -e "s/^IFNEKNEK[ ]*=.*/IFNEKNEK:=$IFNEKNEK/" \
+-e "s/^IFLZ4[ ]*=.*/IFLZ4:=$IFLZ4/" \
+-e "s/^IFLZ4COMMCOMP[ ]*=.*/IFLZ4COMMCOMP:=$IFLZ4COMMCOMP/" \
 -e "s:^USR[ ]*=.*:USR\:=$USR:" \
 -e "s:^USR_LFLAGS[ ]*=.*:USR_LFLAGS\:=$USR_LFLAGS:" \
 -e "s:^S[ ]*=.*:S\:=${SOURCE_ROOT}:" $SOURCE_ROOT/makefile.template >.makefile

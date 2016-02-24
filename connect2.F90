@@ -733,7 +733,7 @@ subroutine genmesh
   use size_m, only : ndim, nid, lelt, nelt
   use input, only : iffmtin, igroup, xc, yc, zc
   use input, only : curve, ccurve
-  use input, only : bc, cbc
+  use input, only : bc, cbc, param
   use mesh, only : shape_x, start_x, end_x
   use mesh, only : boundaries, tboundaries
   use mesh, only : ticks_x, ticks_y, ticks_z
@@ -747,20 +747,6 @@ subroutine genmesh
 
 !   Read elemental mesh data, formatted
   iffmtin = .TRUE. 
-
-  if (nid == 0) then
-    read(9,*) start_x(1), end_x(1), shape_x(1)
-    read(9,*) start_x(2), end_x(2), shape_x(2)
-    read(9,*) start_x(3), end_x(3), shape_x(3)
-    read(9,*) boundaries(1:6)
-    read(9,*) tboundaries(1:6)
-  endif
-
-  call bcast(start_x,3*wdsize)  
-  call bcast(end_x,  3*wdsize)  
-  call bcast(shape_x,3*wdsize)  
-  call bcast(boundaries,3*6)  
-  call bcast(tboundaries,3*6)  
 
   dx = (end_x - start_x) / shape_x
 
@@ -825,6 +811,9 @@ subroutine genmesh
       CBC(1,IEL,:) = boundaries(4)
       CBC(1,IEL,2) = tboundaries(4)
       bc(1,1,iel,:) = ieg + (shape_x(2)-1)*shape_x(1)
+      if (tboundaries(4) == 'T  ') then
+        bc(1,1,iel,2) = param(76) 
+      endif
     else
       bc(1,1,iel,:) = ieg - shape_x(1)
     endif
@@ -833,6 +822,9 @@ subroutine genmesh
       CBC(3,IEL,:) = boundaries(3)
       CBC(3,IEL,2) = tboundaries(3)
       bc(1,3,iel,:) = ieg - ix(2)*shape_x(1)
+      if (tboundaries(3) == 'T  ') then
+        bc(1,3,iel,2) = param(76) 
+      endif
     else
       bc(1,3,iel,:) = ieg + shape_x(1)
     endif
@@ -841,6 +833,9 @@ subroutine genmesh
       CBC(4,IEL,:) = boundaries(1)
       CBC(4,IEL,2) = tboundaries(1)
       bc(1,4,iel,:) = ieg + (shape_x(1) - 1)
+      if (tboundaries(1) == 'T  ') then
+        bc(1,4,iel,2) = param(76) 
+      endif
     else
       bc(1,4,iel,:) = ieg - 1
     endif
@@ -849,6 +844,9 @@ subroutine genmesh
       CBC(2,IEL,:) = boundaries(2)
       CBC(2,IEL,2) = tboundaries(2)
       bc(1,2,iel,:) = ieg - ix(1)
+      if (tboundaries(2) == 'T  ') then
+        bc(1,2,iel,2) = param(76) 
+      endif
     else
       bc(1,2,iel,:) = ieg +1
     endif
@@ -857,6 +855,9 @@ subroutine genmesh
       CBC(5,IEL,1) = boundaries(5)
       CBC(5,IEL,2) = tboundaries(5)
       bc(1,5,iel,:) = ieg + (shape_x(3) - 1)*shape_x(2)*shape_x(1)
+      if (tboundaries(5) == 'T  ') then
+        bc(1,5,iel,2) = param(76) 
+      endif
     else
       bc(1,5,iel,:) = ieg - shape_x(2)*shape_x(1)
     endif
@@ -864,6 +865,9 @@ subroutine genmesh
       CBC(6,IEL,1) = boundaries(6)
       CBC(6,IEL,2) = tboundaries(6)
       bc(1,6,iel,:) = ieg - ix(3) * shape_x(2)*shape_x(1)
+      if (tboundaries(6) == 'T  ') then
+        bc(1,6,iel,2) = param(76) 
+      endif
     else
       bc(1,6,iel,:) = ieg + shape_x(2)*shape_x(1)
     endif
@@ -1590,6 +1594,7 @@ subroutine vrdsmsh()
   use kinds, only : DP
   use size_m, only : lx1, ly1, lz1, lelt
   use size_m, only : nx1, ny1, nz1, nelt, ndim, nid
+  use ds, only : dssum, dsop
   use geom, only : xm1, ym1, zm1
   use input, only : ifheat, cbc, if3d
   use parallel, only : lglel
@@ -1648,7 +1653,7 @@ subroutine vrdsmsh()
 !  $(nid,'tab4',lglel(ie),(ta(k,1,1,ie),k=1,nx1*ny1),ie=1,nelt)
 ! 1 format(i3,a4,i3,16f5.2)
 
-  CALL DSSUM(TA)
+  CALL DSSUM(TA(:,1,1,1))
 
 !   write(6,1)
 !  $(nid,'taaf',lglel(ie),(ta(k,1,1,ie),k=1,nx1*ny1),ie=1,nelt)
