@@ -35,7 +35,8 @@ subroutine nek_init(intracomm)
   use soln, only : nid, jp
   use tstep, only : istep, instep, nsteps, fintim, time
   use geom, only : unx, uny, unz
-
+ 
+  
   implicit none
 
   integer, intent(inout) :: intracomm
@@ -204,6 +205,12 @@ subroutine nek_init(intracomm)
 
 !    call in_situ_init()
 
+! for paraview catalyst in situ_initalize by hussein.almashouq@kaust.edu.sa
+     
+    call coprocessorinitializewithpython("coproc.py",9)  
+  
+! for paraview catalyst in situ_initalize by hussein.almashouq@kaust.edu.sa
+
 !     Initalize timers to ZERO
     call time00
     call opcount(2)
@@ -228,6 +235,7 @@ subroutine nek_init(intracomm)
 subroutine nek_solve
   use ctimer, only : ifsync
   use tstep, only : instep, nid, istep, nsteps, lastep
+  use tcp  
   implicit none
 
 !  real*4 :: papi_mflops
@@ -261,6 +269,14 @@ subroutine nek_solve
       call userchk
       call prepost ( .FALSE. ,'his')
 !        call in_situ_check()
+
+! for paraview catalyst in situ coprocessoring  by hussein.almashouq@kaust.edu.sa
+      
+
+ !call testcoprocessor(nxstart,nxend,nx,ny,nz,time,dble(time),psi01)
+ !call testcoprocessor(kstep)
+      
+! for paraview catalyst in situ coprocessoring  by hussein.almashouq@kaust.edu.sa      
       if (lastep == 1) goto 1001
   enddo
   1001 lastep=1
@@ -377,6 +393,10 @@ subroutine nek_end
     endif
   endif 
 !  call in_situ_end()
+
+! for paraview catalyst in situ finalize   by hussein.almashouq@kaust.edu.sa
+  call coprocessorfinalize()
+! for paraview catalyst in situ finalize   by hussein.almashouq@kaust.edu.sa
   return
 end subroutine nek_end
 !-----------------------------------------------------------------------

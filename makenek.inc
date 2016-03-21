@@ -475,6 +475,39 @@ if [ "$IFVISIT" == "true" -o "$IFVISIT" == "yes" ]; then
   echo ""
 fi
 
+#  start by   by hussein.almashouq@kaust.edu.sa 
+
+
+
+if [ "$IF_PVC_INSITU" == "true" -o "$IF_PVC_INSITU" == "yes" ]; then
+  echo ""
+  echo "Activate  Paraview catalyst in situ coprocessoring "
+  IF_PVC_INSITU=true
+
+  if [ -z "$PVC_INSITU_INC" ]; then
+    PVC_INSITU_INC=/usr/local/include/paraview-4.4/
+  fi
+  echo "  PVC_INSITU_INC = ($PVC_INSITU_INC)"
+  if [ -z "$PVC_INSITU_LIB" ]; then
+   PVC_INSITU_LIB=/usr/lib/paraview-4.4
+  fi
+  echo "  PVC_INSITU_LIB = ($PVC_INSITU_LIB)"
+#   if [ -n "$VISIT_STOP" ]; then
+#     VISIT_STOP="VISIT_STOP"
+#     echo "  VISIT_STOP is defined. Nek5000 will wait for VisIt to Connect."
+#   fi
+
+  sed -e "s/^IF_PVC_INSITU[ ]*=.*/IF_PVC_INSITU:=${IF_PVC_INSITU}/" \
+      -e "s:^PVC_INSITU_IFLAGS[ ]*=.*:PVC_INSITU_IFLAGS\:=-I${PVC_INSITU_INC}:" \
+      -e "s:^PVC_INSITU_LIB[ ]*=.*:PVC_INSITU_LIB\:=-I${PVC_INSITU_LIB}:" \
+      .makefile > .makefile.tmp
+
+  mv .makefile.tmp .makefile
+  echo ""
+fi
+
+#  end  by   by hussein.almashouq@kaust.edu.sa 
+  
 if [ "$USR" != "" ]; then
   echo "###########################################################" >> makefile
   echo "include makefile_usr.inc" >> .makefile

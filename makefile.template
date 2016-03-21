@@ -17,6 +17,7 @@ MOAB_DIR=
 F77=
 CHECKS=
 CC=
+CXX:=/usr/bin/c++ 
 P=
 PPPO=
 PPS=
@@ -27,6 +28,13 @@ USR_LFLAGS=
 IFVISIT=
 VISIT_IFLAGS=
 VISIT_LFLAGS=
+
+
+IF_PVC_INSITU=
+PVC_INSITU_IFLAGS=
+PVC_INSITU_LIB=
+PVC_INSITU_LFLAGS=
+
 FFT_MOD = fft_fftw_mod.o 
 #FFT_MOD = fft_fftw-mpi_mod.o 
 #FFT_MOD = fftpack5.o fft_pack_mod.o 
@@ -129,6 +137,21 @@ ifeq ($(IFVISIT),true)
   lFLAGS := ${lFLAGS} $(VISIT_LFLAGS)
 endif
 
+
+
+#ParaView Catalyst in situ PVC_INSITU Visualization
+
+
+
+ifeq ($(IF_PVC_INSITU),true)
+  PVC_INSITU_NEK_INCLUDES:=-I$S/3rd_party
+  PVC_INSITU_IFLAGS:=-I$(PVC_INSITU_INC)
+  PVC_INSITU_O := pvc_insitu_adaptor.o pvc_insitu.o 
+  include $S/3rd_party/pvc_insitu_makeflags.inc
+  LDFLAGS := ${PVC_INSITU_LFLAGS} $(PVC_INSITU_LIB)
+endif
+
+
 # MOAB #########################################################################
 ifeq ($(IFMOAB),true)
   MOABNEK_INCLUDES:=-I$S/3rd_party
@@ -143,7 +166,7 @@ else
 	DUMMY:= $(shell rm -rf $S/mpif.h) 
 endif
 
-TMP1 = $(CORE) $(MXM) $(USR) $(MOABO) $(COMM_MPI) $(NEKNEKO) $(VISITO) $(LZ4O) $(LPACK)
+TMP1 = $(PVC_INSITU_O)  $(CORE) $(MXM) $(USR) $(MOABO) $(COMM_MPI) $(NEKNEKO) $(VISITO)  $(LZ4O) $(LPACK)
 NOBJS_F = $(patsubst %,$(OBJDIR)/%,$(TMP1))
 TMP2 = $(JLCORE) $(JLINTP) $(CGS) 
 NOBJS_C = $(patsubst %,$(OBJDIR)/%,$(TMP2))
@@ -174,8 +197,8 @@ objdir:
 	@mkdir $(OBJDIR) 2>/dev/null; cat /dev/null 
 
 nek5000:	objdir $(NOBJS)
-	$(F77) -c $(FL2) $(CASEDIR)/${CASENAME}.F90 $(MOABNEK_INCLUDES) $(VISITNEK_INCLUDES) $(IMESH_INCLUDES) -o ${OBJDIR}/${CASENAME}.o 
-	$(F77) -o ${BINNAME} $G ${OBJDIR}/${CASENAME}.o $(NOBJS) $(lFLAGS)
+	$(F77) -c $(FL2) $(CASEDIR)/${CASENAME}.F90 $(MOABNEK_INCLUDES) $(PVC_INSITU_NEK_INCLUDES) $(VISITNEK_INCLUDES) $(IMESH_INCLUDES) -o ${OBJDIR}/${CASENAME}.o 
+	$(F77) -o ${BINNAME} $G ${OBJDIR}/${CASENAME}.o $(NOBJS) $(lFLAGS) $(LDFLAGS)
 	@if test -f ${BINNAME}; then \
 	echo "#############################################################"; \
 	echo "#                  Compilation successful!                  #"; \
@@ -375,3 +398,5 @@ $(OBJDIR)/imeshutil.o   :$S/3rd_party/imeshutil.F90;  	$(F77) -c $(FL2) $(IMESH_
 $(OBJDIR)/imeshcutil.o   :$S/3rd_party/imeshcutil.c;  	$(CC) -c $(cFL2) $< -o $@
 $(OBJDIR)/visit.o        :$S/3rd_party/visit.F90;			$(F77) -c $(VISIT_IFLAGS) $(FL2) $< -o $@
 $(OBJDIR)/nek_in_situ.o  :$S/3rd_party/nek_in_situ.F90;	$(F77) -c $(VISIT_IFLAGS) $(FL2) $< -o $@
+$(OBJDIR)/pvc_insitu.o        :$S/3rd_party/pvc_insitu.F90;			$(F77)   -c   $(Fortran_DEFINES) $(Fortran_FLAGS) $(PVC_INSITU_IFLAGS) $(FL2) $< -o $@
+$(OBJDIR)/pvc_insitu_adaptor.o  :$S/3rd_party/pvc_insitu_adaptor.cxx;	$(CC) -c  $(CXX_DEFINES) $(CXX_FLAGS)  $(PVC_INSITU_IFLAGS) $(cFL2)  $< -o $@
