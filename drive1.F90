@@ -205,10 +205,12 @@ subroutine nek_init(intracomm)
 
 !    call in_situ_init()
 
+
+
 ! for paraview catalyst in situ_initalize by hussein.almashouq@kaust.edu.sa
-     
-    call coprocessorinitializewithpython("coproc.py",9)  
-  
+!#ifdef USE_CATALYST   
+    call coprocessorinitializewithpython("SimplePipeline.py",17)  
+!#endif 
 ! for paraview catalyst in situ_initalize by hussein.almashouq@kaust.edu.sa
 
 !     Initalize timers to ZERO
@@ -272,9 +274,12 @@ subroutine nek_solve
 
 ! for paraview catalyst in situ coprocessoring  by hussein.almashouq@kaust.edu.sa
       
-
+!#ifdef USE_CATALYST     
  !call testcoprocessor(nxstart,nxend,nx,ny,nz,time,dble(time),psi01)
- !call testcoprocessor(kstep)
+ !call testcoprocessor(kstep) 
+!#endif 
+  
+
       
 ! for paraview catalyst in situ coprocessoring  by hussein.almashouq@kaust.edu.sa      
       if (lastep == 1) goto 1001
@@ -395,7 +400,10 @@ subroutine nek_end
 !  call in_situ_end()
 
 ! for paraview catalyst in situ finalize   by hussein.almashouq@kaust.edu.sa
-  call coprocessorfinalize()
+!#ifdef USE_CATALYST    
+   call coprocessorfinalize()  
+!#endif 
+  
 ! for paraview catalyst in situ finalize   by hussein.almashouq@kaust.edu.sa
   return
 end subroutine nek_end

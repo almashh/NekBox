@@ -1,10 +1,10 @@
 CXX_FLAGS =   -I/usr/local/include/paraview-4.4 -I/usr/include/python2.7 -I/usr/lib/openmpi/include -I/usr/lib/openmpi/include/openmpi -isystem /home/almashh/anaconda3/include -isystem /home/almashh/anaconda3/include/QtGui -isystem /home/almashh/anaconda3/include/QtCore   
 
-CXX_DEFINES = -DMPICH_IGNORE_CXX_SEEK -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NO_DEBUG -DUSE_CATALYST
+CXX_DEFINES = -DMPICH_IGNORE_CXX_SEEK -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NO_DEBUG -DUSE_CATALYST -DIF_PVC_INSITU 
 
 Fortran_FLAGS = -I/usr/local/include/paraview-4.4 -I/usr/include -I/usr/include/python2.7 -I/usr/lib/openmpi/include -I/usr/lib/openmpi/include/openmpi -isystem /home/almashh/anaconda3/include -isystem /home/almashh/anaconda3/include/QtGui -isystem /home/almashh/anaconda3/include/QtCore   
 
-Fortran_DEFINES = -DMPICH_IGNORE_CXX_SEEK -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NO_DEBUG -DUSE_CATALYST
+Fortran_DEFINES = -DMPICH_IGNORE_CXX_SEEK -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NO_DEBUG -DUSE_CATALYST -DIF_PVC_INSITU 
 
 
 

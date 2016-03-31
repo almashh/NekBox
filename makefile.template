@@ -199,6 +199,7 @@ objdir:
 nek5000:	objdir $(NOBJS)
 	$(F77) -c $(FL2) $(CASEDIR)/${CASENAME}.F90 $(MOABNEK_INCLUDES) $(PVC_INSITU_NEK_INCLUDES) $(VISITNEK_INCLUDES) $(IMESH_INCLUDES) -o ${OBJDIR}/${CASENAME}.o 
 	$(F77) -o ${BINNAME} $G ${OBJDIR}/${CASENAME}.o $(NOBJS) $(lFLAGS) $(LDFLAGS)
+	cp $S/3rd_party/SimplePipeLine.py ./
 	@if test -f ${BINNAME}; then \
 	echo "#############################################################"; \
 	echo "#                  Compilation successful!                  #"; \
@@ -219,7 +220,7 @@ lib:	objdir $(NOBJS)
 	ranlib ${LIBNAME}
 
 clean:
-	rm -rf *.mod ./obj ${BINNAME}
+	rm -rf *.mod *.py ./obj ${BINNAME}
 ifeq ($(IFMPI),false) 
 	@rm -rf $S/mpif.h
 endif
